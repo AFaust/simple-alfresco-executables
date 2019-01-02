@@ -13,21 +13,21 @@
         <dependencies>
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-annotations</artifactId>
+                <artifactId>jetty-server</artifactId>
                 <version>${dep.jetty.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>apache-jsp</artifactId>
-                <version>${dep.jetty.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>apache-jstl</artifactId>
-                <version>${dep.jetty.version}</version>
-                <type>pom</type>
+                <groupId>de.axelfaust.experiment</groupId>
+                <artifactId>de.axelfaust.experiment.generic.jetty</artifactId>
+                <version>${project.version}</version>
+                <classifier>shaded</classifier>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -56,17 +56,34 @@
                 <version>${dep.jdbc.mysql.version}</version>
                 <scope>runtime</scope>
             </dependency>
+
+            <dependency>
+                <groupId>org.alfresco</groupId>
+                <artifactId>alfresco-share-services</artifactId>
+                <version>${dep.alf.share.version}</version>
+                <classifier>classes</classifier>
+                <scope>runtime</scope>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.orderofthebee.support-tools</groupId>
+                <artifactId>support-tools-repo</artifactId>
+                <version>${dep.ootbee.support-tools.version}</version>
+                <classifier>classes</classifier>
+                <scope>runtime</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-annotations</artifactId>
+            <artifactId>jetty-server</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>apache-jsp</artifactId>
+            <groupId>de.axelfaust.experiment</groupId>
+            <artifactId>de.axelfaust.experiment.generic.jetty</artifactId>
+            <classifier>shaded</classifier>
         </dependency>
         <dependency>
             <groupId>de.axelfaust.experiment</groupId>
@@ -80,6 +97,16 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-share-services</artifactId>
+            <classifier>classes</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.orderofthebee.support-tools</groupId>
+            <artifactId>support-tools-repo</artifactId>
+            <classifier>classes</classifier>
         </dependency>
     </dependencies>
 
@@ -113,6 +140,24 @@
                                         <outputDirectory>${project.build.outputDirectory}/webapps/alfresco</outputDirectory>
                                         <excludes>WEB-INF/lib/*.jar,WEB-INF/classes/log4j.properties</excludes>
                                     </artifactItem>
+                                    <artifactItem>
+                                        <groupId>org.alfresco</groupId>
+                                        <artifactId>alfresco-share-services</artifactId>
+                                        <version>${dep.alf.share.version}</version>
+                                        <type>amp</type>
+                                        <!-- install directly into exploded webapp -->
+                                        <outputDirectory>${project.build.outputDirectory}/webapps/alfresco</outputDirectory>
+                                        <excludes>lib/*.jar</excludes>
+                                    </artifactItem>
+                                    <artifactItem>
+                                        <groupId>org.orderofthebee.support-tools</groupId>
+                                        <artifactId>support-tools-repo</artifactId>
+                                        <version>${dep.ootbee.support-tools.version}</version>
+                                        <type>amp</type>
+                                        <!-- install directly into exploded webapp -->
+                                        <outputDirectory>${project.build.outputDirectory}/webapps/alfresco</outputDirectory>
+                                        <excludes>lib/*.jar</excludes>
+                                    </artifactItem>
                                 </artifactItems>
                             </configuration>
                         </execution>
@@ -132,15 +177,12 @@
                                 <shadedClassifierName>shaded</shadedClassifierName>
                                 <artifactSet>
                                     <includes>
-                                        <include>org.eclipse.jetty:*</include>
-                                        <include>org.eclipse.jetty.toolchain:*</include>
-                                        <include>org.eclipse.jdt:*</include>
-                                        <include>javax.servlet:*</include>
-                                        <include>org.ow2.asm:*</include>
-                                        <include>org.mortbay.jasper:*</include>
+                                        <include>de.axelfaust.experiment:de.axelfaust.experiment.generic.jetty:*</include>
                                         <include>de.axelfaust.experiment:de.axelfaust.experiment.content.services.uberjar:*</include>
                                         <include>org.postgresql:*</include>
                                         <include>mysql:mysql-connector-java</include>
+                                        <include>org.alfresco:alfresco-share-services:classes</include>
+                                        <include>org.orderofthebee.support-tools:support-tools-repo:classes</include>
                                     </includes>
                                 </artifactSet>
                                 <filters>
@@ -158,6 +200,7 @@
                                             <exclude>org/objectweb/asm/**</exclude>
                                             <exclude>net/sf/cglib/**</exclude>
                                         </excludes>
+                                        <!-- TODO Need to relocate all static files from alfresco/* to webapps/alfresco/WEB-INF/classes/alfresco/ -->
                                     </filter>
                                 </filters>
                                 <transformers>
@@ -190,6 +233,9 @@
             </plugin>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>

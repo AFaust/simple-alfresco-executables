@@ -14,6 +14,7 @@
 
         <maven.enforcer.version>1.4.1</maven.enforcer.version>
         <maven.dependency.version>3.1.1</maven.dependency.version>
+        <maven.resources.version>3.0.1</maven.resources.version>
         <maven.compiler.version>3.6.1</maven.compiler.version>
         <maven.source.version>3.0.1</maven.source.version>
         <maven.javadoc.version>2.10.4</maven.javadoc.version>
@@ -21,11 +22,14 @@
         <maven.resources.version>3.0.2</maven.resources.version>
         <maven.shade.version>3.0.0</maven.shade.version>
 
-        <dep.jetty.version>9.4.8.v20180619</dep.jetty.version>
+        <dep.jetty.version>9.4.14.v20181114</dep.jetty.version>
+        <dep.cli-parser.version>1.1.2</dep.cli-parser.version>
+        <dep.slf4j.version>1.7.25</dep.slf4j.version>
 
         <dep.alf.serverRoot.version>6.0</dep.alf.serverRoot.version>
         <dep.alf.content-services.version>6.0.7-ga</dep.alf.content-services.version>
         <dep.alf.share.version>6.0.c</dep.alf.share.version>
+        <dep.ootbee.support-tools.version>1.1.0.0-SNAPSHOT</dep.ootbee.support-tools.version>
         <dep.jdbc.mysql.version>5.1.47</dep.jdbc.mysql.version>
         <dep.jdbc.postgresql.version>42.2.5</dep.jdbc.postgresql.version>
     </properties>
@@ -88,6 +92,7 @@
     <modules>
         <module>content-services-uberjar</module>
         <module>share-uberjar</module>
+        <module>generic-jetty</module>
         <module>content-services-jetty</module>
         <module>share-jetty</module>
     </modules>
@@ -119,6 +124,18 @@
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>${maven.dependency.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>de.acosix.alfresco.maven</groupId>
+                            <artifactId>de.acosix.alfresco.maven.plugins</artifactId>
+                            <version>1.0.0.4-SNAPSHOT</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven.resources.version}</version>
                 </plugin>
 
                 <plugin>

@@ -13,21 +13,21 @@
         <dependencies>
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-annotations</artifactId>
+                <artifactId>jetty-server</artifactId>
                 <version>${dep.jetty.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>apache-jsp</artifactId>
-                <version>${dep.jetty.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>apache-jstl</artifactId>
-                <version>${dep.jetty.version}</version>
-                <type>pom</type>
+                <groupId>de.axelfaust.experiment</groupId>
+                <artifactId>de.axelfaust.experiment.generic.jetty</artifactId>
+                <version>${project.version}</version>
+                <classifier>shaded</classifier>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -41,6 +41,14 @@
                         <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.orderofthebee.support-tools</groupId>
+                <artifactId>support-tools-share</artifactId>
+                <version>${dep.ootbee.support-tools.version}</version>
+                <classifier>classes</classifier>
+                <scope>runtime</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -63,16 +71,22 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-annotations</artifactId>
+            <artifactId>jetty-server</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>apache-jsp</artifactId>
+            <groupId>de.axelfaust.experiment</groupId>
+            <artifactId>de.axelfaust.experiment.generic.jetty</artifactId>
+            <classifier>shaded</classifier>
         </dependency>
         <dependency>
             <groupId>de.axelfaust.experiment</groupId>
             <artifactId>de.axelfaust.experiment.share.uberjar</artifactId>
             <classifier>shaded</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.orderofthebee.support-tools</groupId>
+            <artifactId>support-tools-share</artifactId>
+            <classifier>classes</classifier>
         </dependency>
     </dependencies>
 
@@ -96,51 +110,19 @@
                                         <artifactId>share</artifactId>
                                         <version>${dep.alf.share.version}</version>
                                         <type>war</type>
-                                        <outputDirectory>${project.build.directory}/share-unpacked</outputDirectory>
+                                        <outputDirectory>${project.build.outputDirectory}/webapps/share</outputDirectory>
+                                        <excludes>WEB-INF/lib/*.jar,WEB-INF/classes/log4j.properties</excludes>
+                                    </artifactItem>
+                                    <artifactItem>
+                                        <groupId>org.orderofthebee.support-tools</groupId>
+                                        <artifactId>support-tools-repo</artifactId>
+                                        <version>${dep.ootbee.support-tools.version}</version>
+                                        <type>amp</type>
+                                        <!-- install directly into exploded webapp -->
+                                        <outputDirectory>${project.build.outputDirectory}/webapps/share</outputDirectory>
+                                        <excludes>lib/*.jar</excludes>
                                     </artifactItem>
                                 </artifactItems>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>copy-unpacked-webapp-resources-into-webapp</id>
-                            <phase>prepare-package</phase>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>${project.build.outputDirectory}/webapps/share</outputDirectory>
-                                <resources>
-                                    <resource>
-                                        <directory>${project.build.directory}/share-unpacked</directory>
-                                        <filtering>false</filtering>
-                                        <excludes>
-                                            <exclude>WEB-INF/classes/**/*</exclude>
-                                            <exclude>WEB-INF/lib/*</exclude>
-                                        </excludes>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>copy-unpacked-webapp-resources-into-classpath</id>
-                            <phase>prepare-package</phase>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>${project.build.outputDirectory}</outputDirectory>
-                                <resources>
-                                    <resource>
-                                        <directory>${project.build.directory}/share-unpacked/WEB-INF/classes</directory>
-                                        <filtering>false</filtering>
-                                    </resource>
-                                </resources>
                             </configuration>
                         </execution>
                     </executions>
@@ -159,18 +141,10 @@
                                 <shadedClassifierName>shaded</shadedClassifierName>
                                 <artifactSet>
                                     <includes>
-                                        <include>org.eclipse.jetty:*</include>
-                                        <include>org.eclipse.jetty.toolchain:*</include>
-                                        <include>org.eclipse.jdt:*</include>
-                                        <include>javax.servlet:*</include>
-                                        <include>javax.annotation:*</include>
-                                        <include>org.ow2.asm:*</include>
-                                        <include>org.mortbay.jasper:*</include>
+                                        <include>de.axelfaust.experiment:de.axelfaust.experiment.generic.jetty:*</include>
                                         <include>de.axelfaust.experiment:de.axelfaust.experiment.share.uberjar:*</include>
+                                        <include>org.orderofthebee.support-tools:support-tools-share:classes</include>
                                     </includes>
-                                    <excludes>
-                                        <exclude>javax.servlet:jstl:*</exclude>
-                                    </excludes>
                                 </artifactSet>
                                 <filters>
                                     <filter>
@@ -188,11 +162,9 @@
                                             <exclude>net/sf/cglib/**</exclude>
                                             <!-- Jetty requires a newer version than Share ships -->
                                             <exclude>javax/annotation/**</exclude>
-                                            <!-- for some reason some share.war class files are duplicates to class files of dependencies (web-framework-commons) -->
-                                            <!-- keep those from share.war as they would always override JAR-based classes from dependencies -->
-                                            <exclude>org/alfresco/web/scripts/forms/**</exclude>
-                                            <exclude>org/alfresco/web/config/forms/**</exclude>
                                         </excludes>
+                                        <!-- TODO Need to relocate all static files from alfresco/* to webapps/share/WEB-INF/classes/alfresco/ -->
+                                        <!-- potentially some other Surf stuff as well -->
                                     </filter>
                                 </filters>
                                 <transformers>
@@ -227,6 +199,9 @@
                 <artifactId>maven-dependency-plugin</artifactId>
             </plugin>
             <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
             <plugin>
@@ -237,9 +212,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
             </plugin>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
