@@ -78,16 +78,6 @@
             <artifactId>de.axelfaust.experiment.generic.jetty</artifactId>
             <classifier>shaded</classifier>
         </dependency>
-        <dependency>
-            <groupId>de.axelfaust.experiment</groupId>
-            <artifactId>de.axelfaust.experiment.share.uberjar</artifactId>
-            <classifier>shaded</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.orderofthebee.support-tools</groupId>
-            <artifactId>support-tools-share</artifactId>
-            <classifier>classes</classifier>
-        </dependency>
     </dependencies>
 
     <build>
@@ -98,7 +88,7 @@
                     <artifactId>maven-dependency-plugin</artifactId>
                     <executions>
                         <execution>
-                            <id>unpack-webapps</id>
+                            <id>unpack</id>
                             <phase>prepare-package</phase>
                             <goals>
                                 <goal>unpack</goal>
@@ -111,11 +101,30 @@
                                         <version>${dep.alf.share.version}</version>
                                         <type>war</type>
                                         <outputDirectory>${project.build.outputDirectory}/webapps/share</outputDirectory>
-                                        <excludes>WEB-INF/lib/*.jar,WEB-INF/classes/log4j.properties</excludes>
+                                        <!-- JARs should already be handled by uberjar -->
+                                        <!-- there should be no class files in WAR not covered by JARs in uberjar -->
+                                        <!-- Log4J config will be custom provided -->
+                                        <excludes>WEB-INF/lib/*.jar,WEB-INF/classes/log4j.properties,WEB-INF/classes/**/*.class</excludes>
+                                    </artifactItem>
+                                    <!-- unpacking uber JAR is incredibly slow (Maven bug?), but the only way to move classes into webapp-specific 
+                                        folder -->
+                                    <artifactItem>
+                                        <groupId>de.axelfaust.experiment</groupId>
+                                        <artifactId>de.axelfaust.experiment.share.uberjar</artifactId>
+                                        <version>${project.version}</version>
+                                        <classifier>shaded</classifier>
+                                        <outputDirectory>${project.build.outputDirectory}/webapps/share/WEB-INF/classes</outputDirectory>
                                     </artifactItem>
                                     <artifactItem>
                                         <groupId>org.orderofthebee.support-tools</groupId>
-                                        <artifactId>support-tools-repo</artifactId>
+                                        <artifactId>support-tools-share</artifactId>
+                                        <version>${dep.ootbee.support-tools.version}</version>
+                                        <classifier>classes</classifier>
+                                        <outputDirectory>${project.build.outputDirectory}/webapps/share/WEB-INF/classes</outputDirectory>
+                                    </artifactItem>
+                                    <artifactItem>
+                                        <groupId>org.orderofthebee.support-tools</groupId>
+                                        <artifactId>support-tools-share</artifactId>
                                         <version>${dep.ootbee.support-tools.version}</version>
                                         <type>amp</type>
                                         <!-- install directly into exploded webapp -->
@@ -142,11 +151,15 @@
                                 <artifactSet>
                                     <includes>
                                         <include>de.axelfaust.experiment:de.axelfaust.experiment.generic.jetty:*</include>
-                                        <include>de.axelfaust.experiment:de.axelfaust.experiment.share.uberjar:*</include>
-                                        <include>org.orderofthebee.support-tools:support-tools-share:classes</include>
                                     </includes>
                                 </artifactSet>
                                 <filters>
+                                    <filter>
+                                        <artifact>de.axelfaust.experiment:de.axelfaust.experiment.generic.jetty</artifact>
+                                        <excludes>
+                                            <exclude>log4j.properties</exclude>
+                                        </excludes>
+                                    </filter>
                                     <filter>
                                         <artifact>*:*</artifact>
                                         <excludes>
@@ -154,17 +167,6 @@
                                             <exclude>META-INF/*.DSA</exclude>
                                             <exclude>META-INF/*.RSA</exclude>
                                         </excludes>
-                                    </filter>
-                                    <filter>
-                                        <artifact>de.axelfaust.experiment:de.axelfaust.experiment.share.uberjar</artifact>
-                                        <excludes>
-                                            <exclude>org/objectweb/asm/**</exclude>
-                                            <exclude>net/sf/cglib/**</exclude>
-                                            <!-- Jetty requires a newer version than Share ships -->
-                                            <exclude>javax/annotation/**</exclude>
-                                        </excludes>
-                                        <!-- TODO Need to relocate all static files from alfresco/* to webapps/share/WEB-INF/classes/alfresco/ -->
-                                        <!-- potentially some other Surf stuff as well -->
                                     </filter>
                                 </filters>
                                 <transformers>

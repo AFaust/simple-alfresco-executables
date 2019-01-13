@@ -378,20 +378,6 @@
 
         <dependency>
             <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-share-services</artifactId>
-            <version>6.0.b</version>
-            <classifier>classes</classifier>
-
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.alfresco</groupId>
             <artifactId>alfresco-text-gen</artifactId>
             <version>1.4</version>
 
@@ -2524,19 +2510,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.livetribe</groupId>
-            <artifactId>livetribe-jsr223</artifactId>
-            <version>2.0.7</version>
-
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
@@ -3653,6 +3626,20 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>org.alfresco</groupId>
+            <artifactId>content-services-community</artifactId>
+            <version>${dep.alf.content-services.version}</version>
+            <classifier>classes</classifier>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
     <build>
@@ -3681,6 +3668,7 @@
                                             <exclude>META-INF/*.SF</exclude>
                                             <exclude>META-INF/*.DSA</exclude>
                                             <exclude>META-INF/*.RSA</exclude>
+                                            <exclude>module-info.class</exclude>
                                         </excludes>
                                     </filter>
                                     <filter>

@@ -124,7 +124,7 @@ public abstract class GenericRunner
         return new StartOptions();
     }
 
-    protected static Integer runServer(final StartOptions options, final Collection<Supplier<Handler>> contextHandlerSuppliers)
+    protected static Integer runServer(final StartOptions options, final Collection<Function<Resource, Handler>> contextHandlerSuppliers)
     {
         int exitCode;
         try
@@ -154,31 +154,35 @@ public abstract class GenericRunner
         return exitCode;
     }
 
-    protected static Handler prepareContext() throws Exception
+    protected static Handler prepareContext(final Resource jarRootResource) throws Exception
     {
-        return prepareContext(null, null, null);
+        return prepareContext(jarRootResource, null, null, null);
     }
 
-    protected static Handler prepareContext(final String contextName, final String extraClassPath) throws Exception
-    {
-        return prepareContext(contextName, null, extraClassPath);
-    }
-
-    protected static Handler prepareContext(final String contextName, final String rootResourcePath, final String extraClassPath)
+    protected static Handler prepareContext(final Resource jarRootResource, final String contextName, final String extraClassPath)
             throws Exception
+    {
+        return prepareContext(jarRootResource, contextName, null, extraClassPath);
+    }
+
+    protected static Handler prepareContext(final Resource jarRootResource, final String contextName, final String rootResourcePath,
+            final String extraClassPath) throws Exception
     {
         final WebAppContext context = new WebAppContext();
         context.setContextPath("/" + (contextName != null ? contextName : ""));
 
-        // resolve concrete file to determine directory URL
-        final URL rootResource = GenericRunner.class.getClassLoader().getResource(
-                rootResourcePath != null ? rootResourcePath : ("webapps/" + (contextName != null ? contextName : "ROOT") + "/favicon.ico"));
+        final List<String> serverClasses = new ArrayList<>(Arrays.asList(WebAppContext.__dftServerClasses));
+        // hide logging classes from webapp
+        serverClasses.add("org.slf4j.");
+        serverClasses.add("org.apache.log4j.");
+        // hide CLI classes from webapp
+        serverClasses.add("com.sampullara.");
+        context.setServerClasses(serverClasses.toArray(new String[0]));
 
-        String file = rootResource.getFile();
-        file = file.substring(0, file.lastIndexOf('/') + 1);
-        final URL webAppResource = new URL(rootResource.getProtocol(), rootResource.getHost(), rootResource.getPort(), file);
-        final Resource baseResource = Resource.newResource(webAppResource);
+        final String webappPath = "webapps/" + (contextName != null ? contextName : "ROOT");
+        final Resource baseResource = jarRootResource.addPath(webappPath);
         context.setBaseResource(baseResource);
+        context.setParentLoaderPriority(false);
         final CachingWebAppClassLoader cl = new CachingWebAppClassLoader(context);
         context.setClassLoader(cl);
         cl.addClassPath(baseResource.addPath("WEB-INF/classes/"));
@@ -191,20 +195,28 @@ public abstract class GenericRunner
     }
 
     private static Server setupServer(final String shutdownToken, final StartOptions options,
-            final Collection<Supplier<Handler>> contextHandlerSuppliers) throws IOException
+            final Collection<Function<Resource, Handler>> contextHandlerSuppliers) throws IOException
     {
         final Server server = new Server(options.getEffectivePort());
 
         final Configuration.ClassList classlist = Configuration.ClassList.setServerDefault(server);
         classlist.addBefore(org.eclipse.jetty.webapp.JettyWebXmlConfiguration.class.getName(),
                 org.eclipse.jetty.annotations.AnnotationConfiguration.class.getName());
-        classlist.addAfter(org.eclipse.jetty.webapp.FragmentConfiguration.class.getName(),
-                org.eclipse.jetty.plus.webapp.EnvConfiguration.class.getName(),
-                org.eclipse.jetty.plus.webapp.PlusConfiguration.class.getName());
+        classlist.addAfter(org.eclipse.jetty.webapp.FragmentConfiguration.class.getName());
 
         final List<Handler> handlers = new ArrayList<>();
         handlers.add(new ShutdownHandler(shutdownToken));
-        contextHandlerSuppliers.forEach(handlerSupplier -> handlers.add(handlerSupplier.get()));
+
+        final URL rootResource = GenericRunner.class.getClassLoader().getResource("log4j.properties");
+        String file = rootResource.getFile();
+        file = file.substring(0, file.lastIndexOf('/') + 1);
+        final URL jarResourceURL = new URL(rootResource.getProtocol(), rootResource.getHost(), rootResource.getPort(), file);
+        final String jarResourceURLExternal = jarResourceURL.toExternalForm();
+        final Resource jarRootResource = jarResourceURLExternal.startsWith("jar:file:")
+                ? new EntryNamesCachingJarFileResource(jarResourceURL)
+                : Resource.newResource(jarResourceURL);
+
+        contextHandlerSuppliers.forEach(handlerSupplier -> handlers.add(handlerSupplier.apply(jarRootResource)));
 
         final HandlerList handlerList = new HandlerList(handlers.toArray(new Handler[0]));
 

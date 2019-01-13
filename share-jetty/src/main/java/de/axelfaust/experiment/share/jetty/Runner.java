@@ -3,6 +3,7 @@ package de.axelfaust.experiment.share.jetty;
 import java.util.Arrays;
 
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.util.resource.Resource;
 
 import de.axelfaust.experiment.generic.jetty.GenericRunner;
 
@@ -18,11 +19,11 @@ public class Runner extends GenericRunner
         runMain(args, GenericRunner::defaultStartOptions, options -> runServer(options, Arrays.asList(Runner::prepareShareContextHandler)));
     }
 
-    protected static Handler prepareShareContextHandler()
+    protected static Handler prepareShareContextHandler(final Resource jarRootResource)
     {
         try
         {
-            return prepareContext("share", "./config/share");
+            return prepareContext(jarRootResource, "share", "./config/share");
         }
         catch (final Exception e)
         {

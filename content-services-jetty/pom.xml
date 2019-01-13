@@ -31,19 +31,6 @@
             </dependency>
 
             <dependency>
-                <groupId>de.axelfaust.experiment</groupId>
-                <artifactId>de.axelfaust.experiment.content.services.uberjar</artifactId>
-                <version>${project.version}</version>
-                <classifier>shaded</classifier>
-                <exclusions>
-                    <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${dep.jdbc.postgresql.version}</version>
@@ -54,22 +41,6 @@
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${dep.jdbc.mysql.version}</version>
-                <scope>runtime</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.alfresco</groupId>
-                <artifactId>alfresco-share-services</artifactId>
-                <version>${dep.alf.share.version}</version>
-                <classifier>classes</classifier>
-                <scope>runtime</scope>
-            </dependency>
-            
-            <dependency>
-                <groupId>org.orderofthebee.support-tools</groupId>
-                <artifactId>support-tools-repo</artifactId>
-                <version>${dep.ootbee.support-tools.version}</version>
-                <classifier>classes</classifier>
                 <scope>runtime</scope>
             </dependency>
         </dependencies>
@@ -86,27 +57,12 @@
             <classifier>shaded</classifier>
         </dependency>
         <dependency>
-            <groupId>de.axelfaust.experiment</groupId>
-            <artifactId>de.axelfaust.experiment.content.services.uberjar</artifactId>
-            <classifier>shaded</classifier>
-        </dependency>
-        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-share-services</artifactId>
-            <classifier>classes</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.orderofthebee.support-tools</groupId>
-            <artifactId>support-tools-repo</artifactId>
-            <classifier>classes</classifier>
         </dependency>
     </dependencies>
 
@@ -138,7 +94,33 @@
                                         <version>${dep.alf.content-services.version}</version>
                                         <type>war</type>
                                         <outputDirectory>${project.build.outputDirectory}/webapps/alfresco</outputDirectory>
-                                        <excludes>WEB-INF/lib/*.jar,WEB-INF/classes/log4j.properties</excludes>
+                                        <!-- JARs should already be handled by uberjar -->
+                                        <!-- there should be no class files in WAR not covered by JARs in uberjar -->
+                                        <!-- Log4J config will be custom provided -->
+                                        <excludes>WEB-INF/lib/*.jar,WEB-INF/classes/log4j.properties,WEB-INF/classes/**/*.class</excludes>
+                                    </artifactItem>
+                                    <!-- unpacking uber JAR is incredibly slow (Maven bug?), but the only way to move classes into webapp-specific folder -->
+                                    <artifactItem>
+                                        <groupId>de.axelfaust.experiment</groupId>
+                                        <artifactId>de.axelfaust.experiment.content.services.uberjar</artifactId>
+                                        <version>${project.version}</version>
+                                        <classifier>shaded</classifier>
+                                        <outputDirectory>${project.build.outputDirectory}/webapps/alfresco/WEB-INF/classes</outputDirectory>
+                                        <excludes>log4j.properties</excludes>
+                                    </artifactItem>
+                                    <artifactItem>
+                                        <groupId>org.alfresco</groupId>
+                                        <artifactId>alfresco-share-services</artifactId>
+                                        <version>${dep.alf.share.version}</version>
+                                        <classifier>classes</classifier>
+                                        <outputDirectory>${project.build.outputDirectory}/webapps/alfresco/WEB-INF/classes</outputDirectory>
+                                    </artifactItem>
+                                    <artifactItem>
+                                         <groupId>org.orderofthebee.support-tools</groupId>
+                                        <artifactId>support-tools-repo</artifactId>
+                                        <version>${dep.ootbee.support-tools.version}</version>
+                                        <classifier>classes</classifier>
+                                        <outputDirectory>${project.build.outputDirectory}/webapps/alfresco/WEB-INF/classes</outputDirectory>
                                     </artifactItem>
                                     <artifactItem>
                                         <groupId>org.alfresco</groupId>
@@ -178,14 +160,17 @@
                                 <artifactSet>
                                     <includes>
                                         <include>de.axelfaust.experiment:de.axelfaust.experiment.generic.jetty:*</include>
-                                        <include>de.axelfaust.experiment:de.axelfaust.experiment.content.services.uberjar:*</include>
                                         <include>org.postgresql:*</include>
                                         <include>mysql:mysql-connector-java</include>
-                                        <include>org.alfresco:alfresco-share-services:classes</include>
-                                        <include>org.orderofthebee.support-tools:support-tools-repo:classes</include>
                                     </includes>
                                 </artifactSet>
                                 <filters>
+                                    <filter>
+                                        <artifact>de.axelfaust.experiment:de.axelfaust.experiment.generic.jetty</artifact>
+                                        <excludes>
+                                            <exclude>log4j.properties</exclude>
+                                        </excludes>
+                                    </filter>
                                     <filter>
                                         <artifact>*:*</artifact>
                                         <excludes>
@@ -193,14 +178,6 @@
                                             <exclude>META-INF/*.DSA</exclude>
                                             <exclude>META-INF/*.RSA</exclude>
                                         </excludes>
-                                    </filter>
-                                    <filter>
-                                        <artifact>de.axelfaust.experiment:de.axelfaust.experiment.content.services.uberjar</artifact>
-                                        <excludes>
-                                            <exclude>org/objectweb/asm/**</exclude>
-                                            <exclude>net/sf/cglib/**</exclude>
-                                        </excludes>
-                                        <!-- TODO Need to relocate all static files from alfresco/* to webapps/alfresco/WEB-INF/classes/alfresco/ -->
                                     </filter>
                                 </filters>
                                 <transformers>

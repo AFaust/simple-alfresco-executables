@@ -3,6 +3,7 @@ package de.axelfaust.experiment.content.services.jetty;
 import java.util.Arrays;
 
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.util.resource.Resource;
 
 import de.axelfaust.experiment.generic.jetty.GenericRunner;
 
@@ -18,11 +19,11 @@ public class Runner extends GenericRunner
                 options -> runServer(options, Arrays.asList(Runner::prepareAlfrescoContextHandler, Runner::prepareRootContextHandler)));
     }
 
-    protected static Handler prepareRootContextHandler()
+    protected static Handler prepareRootContextHandler(final Resource jarRootResource)
     {
         try
         {
-            return prepareContext();
+            return prepareContext(jarRootResource);
         }
         catch (final Exception e)
         {
@@ -34,11 +35,11 @@ public class Runner extends GenericRunner
         }
     }
 
-    protected static Handler prepareAlfrescoContextHandler()
+    protected static Handler prepareAlfrescoContextHandler(final Resource jarRootResource)
     {
         try
         {
-            return prepareContext("alfresco", "./config/content-services");
+            return prepareContext(jarRootResource, "alfresco", "./config/content-services");
         }
         catch (final Exception e)
         {
