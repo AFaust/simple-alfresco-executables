@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- depends-on to force early init of log4j config -->
+    <bean class="de.axelfaust.experiment.content.services.adaptions.RepoClassPathStorePostProcessor" depends-on="log4JHierarchyInit">
+        <property name="beanNames">
+            <list>
+                <value>webscripts.store</value>
+                <value>webscripts.store.alfresco</value>
+                <value>webscripts.store.client</value>
+                <value>publicapi.webscripts.store</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean class="de.axelfaust.experiment.content.services.adaptions.ClassPathStorePostProcessor" depends-on="log4JHierarchyInit">
+        <property name="beanNames">
+            <list>
+                <value>webscripts.store.client.extension</value>
+            </list>
+        </property>
+    </bean>
+
+</beans>

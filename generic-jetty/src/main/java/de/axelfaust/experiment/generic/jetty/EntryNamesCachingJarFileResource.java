@@ -82,11 +82,9 @@ public class EntryNamesCachingJarFileResource extends JarFileResource
     // duplicated from super class due to visibility constraints
     private String[] _list;
 
-    private transient boolean _useCaches = Resource.__defaultUseCaches;
-
     public EntryNamesCachingJarFileResource(final URL url)
     {
-        super(url);
+        super(url, true);
         this.entryNames = new ArrayList<>();
         this.entryNamesByBaseDir = new HashMap<>();
         this.entryNamesByDir = new HashMap<>();
@@ -95,7 +93,6 @@ public class EntryNamesCachingJarFileResource extends JarFileResource
     public EntryNamesCachingJarFileResource(final URL url, final boolean useCaches)
     {
         super(url, useCaches);
-        this._useCaches = useCaches;
         this.entryNames = new ArrayList<>();
         this.entryNamesByBaseDir = new HashMap<>();
         this.entryNamesByDir = new HashMap<>();
@@ -114,7 +111,6 @@ public class EntryNamesCachingJarFileResource extends JarFileResource
             final Map<String, List<String>> entryNamesByBaseDir, final Map<String, List<String>> entryNamesByDir)
     {
         super(url, useCaches);
-        this._useCaches = useCaches;
         this.entryNames = entryNames;
         this.entryNamesByBaseDir = entryNamesByBaseDir;
         this.entryNamesByDir = entryNamesByDir;
@@ -135,7 +131,7 @@ public class EntryNamesCachingJarFileResource extends JarFileResource
         path = URIUtil.canonicalPath(path);
 
         return new EntryNamesCachingJarFileResource(new URL(URIUtil.addEncodedPaths(this._url.toExternalForm(), URIUtil.encodePath(path))),
-                this._useCaches, this.entryNames, this.entryNamesByBaseDir, this.entryNamesByDir);
+                this.getUseCaches(), this.entryNames, this.entryNamesByBaseDir, this.entryNamesByDir);
     }
 
     // cannot override private listEntries() so we must override its single user (list()) too

@@ -15,8 +15,8 @@ public class Runner extends GenericRunner
 
     public static void main(final String[] args) throws Exception
     {
-        runMain(args, GenericRunner::defaultStartOptions,
-                options -> runServer(options, Arrays.asList(Runner::prepareAlfrescoContextHandler, Runner::prepareRootContextHandler)));
+        runMain(args, GenericRunner::defaultStartOptions, options -> runServer(options,
+                Arrays.asList(Runner::prepareAlfrescoContextHandler, Runner::prepareRootContextHandler, Runner::prepareVtiContextHandler)));
     }
 
     protected static Handler prepareRootContextHandler(final Resource jarRootResource)
@@ -40,6 +40,22 @@ public class Runner extends GenericRunner
         try
         {
             return prepareContext(jarRootResource, "alfresco", "./config/content-services");
+        }
+        catch (final Exception e)
+        {
+            if (e instanceof RuntimeException)
+            {
+                throw (RuntimeException) e;
+            }
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected static Handler prepareVtiContextHandler(final Resource jarRootResource)
+    {
+        try
+        {
+            return prepareContext(jarRootResource, "_vti_bin", null);
         }
         catch (final Exception e)
         {

@@ -74,7 +74,7 @@
                     <artifactId>maven-dependency-plugin</artifactId>
                     <executions>
                         <execution>
-                            <id>unpack-webapps</id>
+                            <id>unpack-webapps-and-amps</id>
                             <phase>prepare-package</phase>
                             <goals>
                                 <goal>unpack</goal>
@@ -99,6 +99,13 @@
                                         <!-- Log4J config will be custom provided -->
                                         <excludes>WEB-INF/lib/*.jar,WEB-INF/classes/log4j.properties,WEB-INF/classes/**/*.class</excludes>
                                     </artifactItem>
+                                    <artifactItem>
+                                        <groupId>org.alfresco.aos-module</groupId>
+                                        <artifactId>alfresco-vti-bin</artifactId>
+                                        <version>${dep.alf.aos.version}</version>
+                                        <type>war</type>
+                                        <outputDirectory>${project.build.outputDirectory}/webapps/_vti_bin</outputDirectory>
+                                    </artifactItem>
                                     <!-- unpacking uber JAR is incredibly slow (Maven bug?), but the only way to move classes into webapp-specific folder -->
                                     <artifactItem>
                                         <groupId>de.axelfaust.experiment</groupId>
@@ -108,19 +115,14 @@
                                         <outputDirectory>${project.build.outputDirectory}/webapps/alfresco/WEB-INF/classes</outputDirectory>
                                         <excludes>log4j.properties</excludes>
                                     </artifactItem>
+                                    <!-- adaptations to make Content Services work (better) in a fat JAR -->
                                     <artifactItem>
-                                        <groupId>org.alfresco</groupId>
-                                        <artifactId>alfresco-share-services</artifactId>
-                                        <version>${dep.alf.share.version}</version>
-                                        <classifier>classes</classifier>
-                                        <outputDirectory>${project.build.outputDirectory}/webapps/alfresco/WEB-INF/classes</outputDirectory>
-                                    </artifactItem>
-                                    <artifactItem>
-                                         <groupId>org.orderofthebee.support-tools</groupId>
-                                        <artifactId>support-tools-repo</artifactId>
-                                        <version>${dep.ootbee.support-tools.version}</version>
-                                        <classifier>classes</classifier>
-                                        <outputDirectory>${project.build.outputDirectory}/webapps/alfresco/WEB-INF/classes</outputDirectory>
+                                        <groupId>${project.groupId}</groupId>
+                                        <artifactId>de.axelfaust.experiment.content.services.adaptions</artifactId>
+                                        <version>${project.version}</version>
+                                        <type>amp</type>
+                                        <!-- install directly into exploded webapp -->
+                                        <outputDirectory>${project.build.outputDirectory}/webapps/alfresco</outputDirectory>
                                     </artifactItem>
                                     <artifactItem>
                                         <groupId>org.alfresco</groupId>
@@ -129,7 +131,14 @@
                                         <type>amp</type>
                                         <!-- install directly into exploded webapp -->
                                         <outputDirectory>${project.build.outputDirectory}/webapps/alfresco</outputDirectory>
-                                        <excludes>lib/*.jar</excludes>
+                                    </artifactItem>
+                                    <artifactItem>
+                                        <groupId>org.alfresco.aos-module</groupId>
+                                        <artifactId>alfresco-aos-module</artifactId>
+                                        <version>${dep.alf.aos.version}</version>
+                                        <type>amp</type>
+                                        <!-- install directly into exploded webapp -->
+                                        <outputDirectory>${project.build.outputDirectory}/webapps/alfresco</outputDirectory>
                                     </artifactItem>
                                     <artifactItem>
                                         <groupId>org.orderofthebee.support-tools</groupId>
@@ -138,9 +147,49 @@
                                         <type>amp</type>
                                         <!-- install directly into exploded webapp -->
                                         <outputDirectory>${project.build.outputDirectory}/webapps/alfresco</outputDirectory>
-                                        <excludes>lib/*.jar</excludes>
                                     </artifactItem>
                                 </artifactItems>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                
+                <plugin>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>unpack-jars-from-webapps-and-amps</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                            <configuration>
+                                <target>
+                                    <!-- unpack JAR files from any AMPs -->
+                                    <unzip dest="${project.build.outputDirectory}/webapps/alfresco/WEB-INF/classes">
+                                        <fileset dir="${project.build.outputDirectory}/webapps/alfresco/WEB-INF/lib">
+                                            <include name="*.jar"/>
+                                        </fileset>
+                                        <patternset>
+                                            <exclude name="log4j.properties"/>
+                                        </patternset>
+                                    </unzip>
+                                    <delete>
+                                        <fileset dir="${project.build.outputDirectory}/webapps/alfresco/WEB-INF/lib" includes="*.jar"/>
+                                    </delete>
+                                    <!-- unpack JAR files of _vti_bin WAR artifact -->
+                                    <unzip dest="${project.build.outputDirectory}/webapps/_vti_bin/WEB-INF/classes">
+                                        <fileset dir="${project.build.outputDirectory}/webapps/_vti_bin/WEB-INF/lib">
+                                            <include name="*.jar"/>
+                                        </fileset>
+                                        <patternset>
+                                            <exclude name="log4j.properties"/>
+                                        </patternset>
+                                    </unzip>
+                                    <delete>
+                                        <fileset dir="${project.build.outputDirectory}/webapps/_vti_bin/WEB-INF/lib" includes="*.jar"/>
+                                    </delete>
+                                </target>
                             </configuration>
                         </execution>
                     </executions>
@@ -225,6 +274,9 @@
             </plugin>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
             </plugin>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>

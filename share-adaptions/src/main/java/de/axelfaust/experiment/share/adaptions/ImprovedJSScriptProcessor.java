@@ -1,4 +1,4 @@
-package de.axelfaust.experiment.share.jetty;
+package de.axelfaust.experiment.share.adaptions;
 
 import org.springframework.extensions.webscripts.processor.JSScriptProcessor;
 

@@ -1,4 +1,4 @@
-package de.axelfaust.experiment.share.jetty;
+package de.axelfaust.experiment.share.adaptions;
 
 import java.io.InputStream;
 import java.util.List;

@@ -21,6 +21,7 @@
         <maven.jar.version>3.0.2</maven.jar.version>
         <maven.resources.version>3.0.2</maven.resources.version>
         <maven.shade.version>3.0.0</maven.shade.version>
+        <maven.antrun.version>1.8</maven.antrun.version>
 
         <dep.jetty.version>9.4.14.v20181114</dep.jetty.version>
         <dep.cli-parser.version>1.1.2</dep.cli-parser.version>
@@ -29,6 +30,7 @@
         <dep.alf.serverRoot.version>6.0</dep.alf.serverRoot.version>
         <dep.alf.content-services.version>6.0.7-ga</dep.alf.content-services.version>
         <dep.alf.share.version>6.0.c</dep.alf.share.version>
+        <dep.alf.aos.version>1.2.2</dep.alf.aos.version>
         <dep.ootbee.support-tools.version>1.1.0.0-SNAPSHOT</dep.ootbee.support-tools.version>
         <dep.jdbc.mysql.version>5.1.47</dep.jdbc.mysql.version>
         <dep.jdbc.postgresql.version>42.2.5</dep.jdbc.postgresql.version>
@@ -92,6 +94,8 @@
     <modules>
         <module>content-services-uberjar</module>
         <module>share-uberjar</module>
+        <module>content-services-adaptions</module>
+        <module>share-adaptions</module>
         <module>generic-jetty</module>
         <module>content-services-jetty</module>
         <module>share-jetty</module>
@@ -181,6 +185,11 @@
                 <plugin>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>${maven.shade.version}</version>
+                </plugin>
+                
+                <plugin>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>${maven.antrun.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>

@@ -29,46 +29,10 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-
-            <dependency>
-                <groupId>de.axelfaust.experiment</groupId>
-                <artifactId>de.axelfaust.experiment.share.uberjar</artifactId>
-                <version>${project.version}</version>
-                <classifier>shaded</classifier>
-                <exclusions>
-                    <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.orderofthebee.support-tools</groupId>
-                <artifactId>support-tools-share</artifactId>
-                <version>${dep.ootbee.support-tools.version}</version>
-                <classifier>classes</classifier>
-                <scope>runtime</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>org.alfresco.surf</groupId>
-            <artifactId>spring-surf-core-configservice</artifactId>
-            <version>6.20</version>
-        </dependency>
-        <dependency>
-            <groupId>org.alfresco.surf</groupId>
-            <artifactId>spring-webscripts</artifactId>
-            <version>6.20</version>
-        </dependency>
-        <dependency>
-            <groupId>org.alfresco.surf</groupId>
-            <artifactId>spring-surf</artifactId>
-            <version>6.11</version>
-        </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
@@ -88,7 +52,7 @@
                     <artifactId>maven-dependency-plugin</artifactId>
                     <executions>
                         <execution>
-                            <id>unpack</id>
+                            <id>unpack-webapps-and-amps</id>
                             <phase>prepare-package</phase>
                             <goals>
                                 <goal>unpack</goal>
@@ -116,11 +80,12 @@
                                         <outputDirectory>${project.build.outputDirectory}/webapps/share/WEB-INF/classes</outputDirectory>
                                     </artifactItem>
                                     <artifactItem>
-                                        <groupId>org.orderofthebee.support-tools</groupId>
-                                        <artifactId>support-tools-share</artifactId>
-                                        <version>${dep.ootbee.support-tools.version}</version>
-                                        <classifier>classes</classifier>
-                                        <outputDirectory>${project.build.outputDirectory}/webapps/share/WEB-INF/classes</outputDirectory>
+                                        <groupId>${project.groupId}</groupId>
+                                        <artifactId>de.axelfaust.experiment.share.adaptions</artifactId>
+                                        <version>${project.version}</version>
+                                        <type>amp</type>
+                                        <!-- install directly into exploded webapp -->
+                                        <outputDirectory>${project.build.outputDirectory}/webapps/share</outputDirectory>
                                     </artifactItem>
                                     <artifactItem>
                                         <groupId>org.orderofthebee.support-tools</groupId>
@@ -129,9 +94,37 @@
                                         <type>amp</type>
                                         <!-- install directly into exploded webapp -->
                                         <outputDirectory>${project.build.outputDirectory}/webapps/share</outputDirectory>
-                                        <excludes>lib/*.jar</excludes>
                                     </artifactItem>
                                 </artifactItems>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                
+                <plugin>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>unpack-jars-from-webapps-and-amps</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                            <configuration>
+                                <target>
+                                    <!-- unpack JAR files from any AMPs -->
+                                    <unzip dest="${project.build.outputDirectory}/webapps/share/WEB-INF/classes">
+                                        <fileset dir="${project.build.outputDirectory}/webapps/share/WEB-INF/lib">
+                                            <include name="*.jar"/>
+                                        </fileset>
+                                        <patternset>
+                                            <exclude name="log4j.properties"/>
+                                        </patternset>
+                                    </unzip>
+                                    <delete>
+                                        <fileset dir="${project.build.outputDirectory}/webapps/share/WEB-INF/lib" includes="*.jar"/>
+                                    </delete>
+                                </target>
                             </configuration>
                         </execution>
                     </executions>
@@ -214,6 +207,9 @@
             </plugin>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
             </plugin>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>

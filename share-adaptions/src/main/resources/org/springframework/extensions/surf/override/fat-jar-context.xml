@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean class="de.axelfaust.experiment.share.adaptions.UrlConfigSourcePostProcessor" />
+
+    <bean class="de.axelfaust.experiment.share.adaptions.JSScriptProcessorPostProcessor" />
+    
+    <bean class="de.axelfaust.experiment.share.adaptions.ClassPathStorePostProcessor">
+        <property name="beanNames">
+            <list>
+                <value>webscripts.store</value>
+                <value>webscripts.store.alfresco</value>
+                <value>webscripts.store.client.extension</value>
+                <value>extensibility.config.store</value>
+                <value>webframework.classpathstore.presets</value>
+                <value>webframework.classpathstore.presets.custom</value>
+                <value>webframework.webscripts.store.classpath</value>
+                <value>webframework.webscripts.store.alfresco.classpath</value>
+                <value>webframework.webscripts.store.alfresco.custom</value>
+                <value>webframework.templates.store.classpath</value>
+                <value>webframework.templates.store.alfresco.classpath</value>
+                <value>webframework.templates.store.alfresco.custom</value>
+                <value>webframework.sitedata.store.alfresco-classpath</value>
+                <value>webframework.sitedata.store.classpath.alfresco-custom</value>
+                <value>webframework.sitedata.store.classpath</value>
+            </list>
+        </property>
+    </bean>
+
+</beans>
